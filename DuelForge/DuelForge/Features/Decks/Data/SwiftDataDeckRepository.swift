@@ -44,4 +44,21 @@ public final class SwiftDataDeckRepository: DeckRepositoryProtocol {
         
         try context.save()
     }
+    
+    public func update(deck: Deck) async throws {
+        let targetId = deck.id
+        
+        let descriptor = FetchDescriptor<DeckEntity>(
+            predicate: #Predicate { $0.id == targetId }
+        )
+        
+        if let entity = try context.fetch(descriptor).first {
+            entity.name = deck.name
+            entity.archetype = deck.archetype
+            
+            try context.save()
+        } else {
+            print("Error: Could not update the deck, it does not exist in the database.")
+        }
+    }
 }

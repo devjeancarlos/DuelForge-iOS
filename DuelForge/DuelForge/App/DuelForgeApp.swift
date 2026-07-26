@@ -9,9 +9,22 @@ import SwiftUI
 
 @main
 struct DuelForgeApp: App {
+    private let container = AppDIContainer()
+    private let navigationController = UINavigationController()
+    private let appCoordinator: AppCoordinator
+    
+    init() {
+        self.appCoordinator = AppCoordinator(
+            navigationController: navigationController,
+            container: container)
+        
+        self.appCoordinator.start()
+    }
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            CoordinatorView(navigationController: navigationController)
+                .ignoresSafeArea()
         }
     }
 }
