@@ -24,6 +24,14 @@ public final class AppCoordinator: Coordinator {
     public func start() {
         navigationController.navigationBar.prefersLargeTitles = true
         
+        let deckListCoordinator = DeckListCoordinator(
+            navigationController: navigationController,
+            diContainer: container
+        )
+        
+        addChild(deckListCoordinator)
+        deckListCoordinator.start()
+        
         print("AppCoordinator started")
     }
 }
