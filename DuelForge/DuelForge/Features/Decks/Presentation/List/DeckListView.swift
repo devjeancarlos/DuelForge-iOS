@@ -23,13 +23,20 @@ public struct DeckListView: View {
                     description: Text("Create your first deck to start"))
             } else {
                 VStack(spacing: 20) {
-                    List(viewModel.decks) { deck in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(deck.name)
-                                .font(.headline)
-                            Text(deck.archetype)
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                    List {
+                        ForEach(viewModel.decks) { deck in
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(deck.name)
+                                    .font(.headline)
+                                Text(deck.archetype)
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                        .onDelete{ indexSet in
+                            Task {
+                                await viewModel.deleteDeck(at: indexSet)
+                            }
                         }
                     }
                 }

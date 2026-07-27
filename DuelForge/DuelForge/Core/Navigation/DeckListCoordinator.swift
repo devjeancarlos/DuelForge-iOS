@@ -24,7 +24,12 @@ public final class DeckListCoordinator: Coordinator {
     
     public func start() {
         let getDecksUseCase = diContainer.makeGetDeckUseCase()
-        let viewModel = DeckListViewModel(getDecksUseCase: getDecksUseCase)
+        let deleteUseCase = diContainer.makeDeleteDeckUseCase()
+        
+        let viewModel = DeckListViewModel(
+            getDecksUseCase: getDecksUseCase,
+            deleteDeckuseCase: deleteUseCase
+        )
         
         viewModel.onAddDeckTapped = { [weak self] in
             guard let self else { return }
