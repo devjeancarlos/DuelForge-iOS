@@ -25,13 +25,18 @@ public struct DeckListView: View {
                 VStack(spacing: 20) {
                     List {
                         ForEach(viewModel.decks) { deck in
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(deck.name)
-                                    .font(.headline)
-                                Text(deck.archetype)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
+                            Button{
+                                viewModel.onDeckSelected?(deck)
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(deck.name)
+                                        .font(.headline)
+                                    Text(deck.archetype)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                }
                             }
+                            .buttonStyle(.plain)
                         }
                         .onDelete{ indexSet in
                             Task {

@@ -54,6 +54,30 @@ public final class DeckListCoordinator: Coordinator {
             createDeckCoordinator.start()
         }
         
+        viewModel.onDeckSelected = { [weak self] selectedDeck in
+            guard let self else { return }
+            
+            let editDeckCoordinator = EditDeckCoordinator(
+                navigationController: self.navigationController,
+                diContainer: self.diContainer,
+                deck: selectedDeck)
+            
+            self.addChild(editDeckCoordinator)
+            
+            editDeckCoordinator.finishPublisher.sink{ [weak self, weak editDeckCoordinator] _ in
+                guard let self = self, let coordinator = editDeckCoordinator else { return }
+                
+                self.removeChild(coordinator)
+                
+                Task {
+                    await viewModel.loadDecks()
+                }
+            }
+            .store(in: &cancellables)
+            
+        editDeckCoordinator.start()
+        }
+        
         let view = DeckListView(viewModel: viewModel)
         
         let hostingController = UIHostingController(rootView: view)

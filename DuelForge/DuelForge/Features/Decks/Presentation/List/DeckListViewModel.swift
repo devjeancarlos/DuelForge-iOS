@@ -13,7 +13,9 @@ public class DeckListViewModel {
     public var decks: [Deck] = []
     private let getDecksUseCase: GetDecksUseCaseProtocol
     private let deleteDeckUseCase: DeleteDeckUseCaseProtocol
+    
     public var onAddDeckTapped: (() -> Void)?
+    public var onDeckSelected: ((Deck) -> Void)?
     
     public init(getDecksUseCase: GetDecksUseCaseProtocol, deleteDeckuseCase: DeleteDeckUseCaseProtocol) {
         self.getDecksUseCase = getDecksUseCase
