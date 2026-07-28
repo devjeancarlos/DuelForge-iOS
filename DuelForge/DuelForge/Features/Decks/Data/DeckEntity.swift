@@ -15,6 +15,9 @@ public final class DeckEntity {
     public var archetype: String
     public var createdAt: Date
     
+    @Relationship(deleteRule: .cascade, inverse: \CardEntity.deck)
+    public var cards: [CardEntity]? = []
+    
     public init(id: UUID, name: String, archetype: String, createdAt: Date) {
         self.id = id
         self.name = name
@@ -25,11 +28,13 @@ public final class DeckEntity {
 
 public extension DeckEntity {
     func toDomain() -> Deck {
+        let domainCards = cards?.map { $0.toDomain() } ?? []
         return Deck(
             id: self.id,
             name: self.name,
             archetype: self.archetype,
-            createdAt: self.createdAt
+            createdAt: self.createdAt,
+            cards: domainCards
         )
     }
 }

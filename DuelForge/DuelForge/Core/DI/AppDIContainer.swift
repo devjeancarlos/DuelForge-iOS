@@ -15,7 +15,7 @@ public final class AppDIContainer {
     
     public init () {
         do {
-            let schema = Schema([DeckEntity.self])
+            let schema = Schema([DeckEntity.self, CardEntity.self])
             let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
             
             self.modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
