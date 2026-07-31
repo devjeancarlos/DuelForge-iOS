@@ -41,4 +41,12 @@ public final class AppDIContainer {
     public func makeUpdateDeckUseCase() -> UpdateDeckUseCaseProtocol {
         return UpdateDeckUseCase(repository: deckRepository)
     }
+    
+    public func makeCardRepository() -> CardRepositoryProtocol {
+        return SwiftDataCardRepository(modelContainer: self.modelContainer)
+    }
+    
+    public func makeAddCardToDeckUseCase() -> AddCardToDeckUseCaseProtocol {
+        return AddCardToDeckUseCase(repository: makeCardRepository())
+    }
 }
