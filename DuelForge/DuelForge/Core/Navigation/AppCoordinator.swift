@@ -13,16 +13,15 @@ public final class AppCoordinator: Coordinator {
     public var childCoordinators: [Coordinator] = []
     public var finishPublisher = PassthroughSubject<Void, Never>()
     
-    private let container: AppDIContainer
-    public var cancellables = Set<AnyCancellable>()
+    private let appDIcontainer = AppDIContainer()
     
-    public init(navigationController: UINavigationController, container: AppDIContainer) {
+    public init(navigationController: UINavigationController) {
         self.navigationController = navigationController
-        self.container = container
     }
     
     public func start() {
-        navigationController.navigationBar.prefersLargeTitles = true
+        //navigationController.navigationBar.prefersLargeTitles = true
+        let deckSceneDIContainer = appDIcontainer.makeDeckSceneDIContainer()
         
         let deckListCoordinator = DeckListCoordinator(
             navigationController: navigationController,

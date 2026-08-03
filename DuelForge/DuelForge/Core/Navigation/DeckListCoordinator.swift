@@ -14,30 +14,22 @@ public final class DeckListCoordinator: Coordinator {
     public var childCoordinators: [Coordinator] = []
     public var finishPublisher = PassthroughSubject<Void, Never>()
     
-    private var diContainer: AppDIContainer
+    //private var diContainer: AppDIContainer
+    private let factory: AppFactory
     private var cancellables = Set<AnyCancellable>()
     
-    public init(navigationController: UINavigationController, diContainer: AppDIContainer) {
+    public init(navigationController: UINavigationController, factory: AppFactory) {
         self.navigationController = navigationController
-        self.diContainer = diContainer
+        self.factory = factory
     }
     
     public func start() {
-        let getDecksUseCase = diContainer.makeGetDeckUseCase()
-        let deleteUseCase = diContainer.makeDeleteDeckUseCase()
-        
-        let viewModel = DeckListViewModel(
-            getDecksUseCase: getDecksUseCase,
-            deleteDeckuseCase: deleteUseCase
-        )
+        let viewModel = factory.makeDeckListViewModel()
         
         viewModel.onAddDeckTapped = { [weak self] in
             guard let self else { return }
             
-            let createDeckCoordinator = CreateDeckCoordinator(
-                navigationController: self.navigationController, diContainer: self.diContainer
-                )
-            
+            let createDeckCoordinator = factory.makeCreateDeckCoordinator(navigationController: self.navigationController)
             self.addChild(createDeckCoordinator)
             
             createDeckCoordinator.finishPublisher.sink { [weak self, weak createDeckCoordinator] _ in
@@ -57,11 +49,7 @@ public final class DeckListCoordinator: Coordinator {
         viewModel.onDeckSelected = { [weak self] selectedDeck in
             guard let self else { return }
             
-            let editDeckCoordinator = EditDeckCoordinator(
-                navigationController: self.navigationController,
-                diContainer: self.diContainer,
-                deck: selectedDeck)
-            
+            let editDeckCoordinator = factory.makeEditDeckCoordinator(navigationController: self.navigationController, deck: selectedDeck)
             self.addChild(editDeckCoordinator)
             
             editDeckCoordinator.finishPublisher.sink{ [weak self, weak editDeckCoordinator] _ in

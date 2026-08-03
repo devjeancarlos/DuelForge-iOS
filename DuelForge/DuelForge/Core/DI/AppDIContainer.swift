@@ -11,22 +11,30 @@ import SwiftData
 @MainActor
 public final class AppDIContainer {
     public let modelContainer: ModelContainer
-    private let deckRepository: DeckRepositoryProtocol
+    public lazy var apiClient: APIClientProtocol = {
+        return YGOProDeckClient()
+    }()
+    //private let deckRepository: DeckRepositoryProtocol
     
     public init () {
         do {
             let schema = Schema([DeckEntity.self, CardEntity.self])
             let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-            
             self.modelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
-            
-            self.deckRepository = SwiftDataDeckRepository(container: modelContainer)
         } catch {
-            fatalError("ModelContainer could not be initialized")
+            fatalError("Database couldn't be initialized")
         }
     }
     
-    public func makeGetDeckUseCase() -> GetDecksUseCaseProtocol {
+    public func makeDeckSceneDIContainer() -> DeckSceneDIContainer {
+        let dependencies = DeckSceneDIContainer.Dependencies(
+            apiClient: apiClient,
+            modelContainer: self.modelContainer)
+        
+        return DeckSceneDIContainer(dependencies: dependencies)
+    }
+    
+    /*public func makeGetDeckUseCase() -> GetDecksUseCaseProtocol {
         return GetDecksUseCase(repository: deckRepository)
     }
     
@@ -49,4 +57,8 @@ public final class AppDIContainer {
     public func makeAddCardToDeckUseCase() -> AddCardToDeckUseCaseProtocol {
         return AddCardToDeckUseCase(repository: makeCardRepository())
     }
+    
+    public func makeAPIClientProtocl() -> APIClientProtocol {
+        return YGOProDeckClient()
+    }*/
 }
