@@ -1,42 +1,42 @@
 //
-//  CreateDeckCoordinator.swift
+//  SearchCardCoordinator.swift
 //  DuelForge
 //
-//  Created by Jean Carlos Ramos Cruz on 27/07/26.
+//  Created by Jean Carlos Ramos Cruz on 3/08/26.
 //
 
-import UIKit
+import Foundation
 import SwiftUI
 import Combine
 
-public final class CreateDeckCoordinator: Coordinator {
+public final class SearchCardCoordinator: Coordinator {
     public var navigationController: UINavigationController
     public var childCoordinators: [Coordinator] = []
     public var finishPublisher = PassthroughSubject<Void, Never>()
     
     private let factory: ViewModelFactory
+    private let targetDeck: Deck
     
-    public init(navigationController: UINavigationController, factory: ViewModelFactory) {
+    public init(navigationController: UINavigationController, factory: ViewModelFactory, deck: Deck) {
         self.navigationController = navigationController
         self.factory = factory
+        self.targetDeck = deck
     }
     
+    @MainActor
     public func start() {
-        let viewModel = factory.makeCreateDeckViewModel()
+        let viewModel = factory.makeSearchCardViewModel(deck: self.targetDeck)
         
-        viewModel.onSaveFinished = { [weak self] in
+        viewModel.onFinished = { [weak self] in
             guard let self else { return }
-            //Back to previous view
+            
             self.navigationController.popViewController(animated: true)
-            //Notify to the father coordinator
             self.finishPublisher.send()
         }
         
-        let view = CreateDeckView(viewModel: viewModel)
+        let view = SearchCardView(viewModel: viewModel)
         let hostingController = UIHostingController(rootView: view)
-        hostingController.title = "New Deck"
         
         navigationController.pushViewController(hostingController, animated: true)
     }
-    
 }

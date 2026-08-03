@@ -7,9 +7,80 @@
 
 import Foundation
 import Observation
-import Combine
 
 @Observable
+@MainActor
 public final class SearchCardViewModel {
+    public private(set) var searchResults: [Card] = []
+    public private(set) var isLoading: Bool = false
+    public private(set) var errorMessage: String? = nil
     
+    public var searchText: String = "" {
+        didSet {
+            if searchText != oldValue {
+                debounceSearch()
+            }
+        }
+    }
+    
+    @ObservationIgnored public var onFinished: (() -> Void)?
+    @ObservationIgnored private var searchTask: Task<Void, Never>?
+    
+    private let deck: Deck
+    private let apiClient: APIClientProtocol
+    private let addCardUseCase: AddCardToDeckUseCaseProtocol
+    
+    public init(deck: Deck, apiClient: APIClientProtocol, addCardUseCase: AddCardToDeckUseCaseProtocol) {
+        self.deck = deck
+        self.apiClient = apiClient
+        self.addCardUseCase = addCardUseCase
+    }
+    
+    private func debounceSearch() {
+        searchTask?.cancel()
+        let query = searchText
+        
+        if query.count < 3 {
+            self.searchResults = []
+            return
+        }
+        
+        searchTask = Task {
+            do {
+                try await Task.sleep(for: .seconds(0.5))
+                await performSearch(query: query)
+            } catch {
+                //Canceled Tassk
+            }
+        }
+    }
+    
+    private func performSearch(query: String) async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            let cards = try await apiClient.searchCards(query: query)
+            self.searchResults = cards
+        } catch {
+            self.errorMessage = "Error searching"
+            self.searchResults = []
+        }
+        
+        isLoading = false
+    }
+    
+    public func addCardToDeck(_ card: Card) {
+        Task {
+            do {
+                try await addCardUseCase.execute(deck: self.deck, card: card)
+            } catch {
+                self.errorMessage = "Error saving card"
+            }
+        }
+    }
+    
+    public func finishSearch() {
+        onFinished?()
+    }
 }

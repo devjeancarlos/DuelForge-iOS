@@ -14,21 +14,20 @@ public final class EditDeckCoordinator: Coordinator {
     public var childCoordinators: [Coordinator] = []
     public var finishPublisher = PassthroughSubject<Void, Never>()
     
-    private let diContainer: AppDIContainer
+    private let factory: ViewModelFactory
     private let deckToUdpate: Deck
     
-    public init(navigationController: UINavigationController, diContainer: AppDIContainer, deck: Deck) {
+    public init(navigationController: UINavigationController, factory: ViewModelFactory, deck: Deck) {
         self.navigationController = navigationController
-        self.diContainer = diContainer
+        self.factory = factory
         self.deckToUdpate = deck
     }
     
     public func start() {
-        let updateDeckUseCase = diContainer.makeUpdateDeckUseCase()
-        let viewModel = EditDeckViewModel(deck: deckToUdpate, updateDeckUseCase: updateDeckUseCase)
+        let viewModel = factory.makeEditDeckViewModel(deck: deckToUdpate)
         
         viewModel.onUpdateFinished = { [weak self] in
-            //checkingif EditDeckCoordinator still exists
+            //checking if EditDeckCoordinator still exists
             guard let self else { return }
             
             //Back to previous view

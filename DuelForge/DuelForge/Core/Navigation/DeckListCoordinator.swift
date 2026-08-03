@@ -14,7 +14,6 @@ public final class DeckListCoordinator: Coordinator {
     public var childCoordinators: [Coordinator] = []
     public var finishPublisher = PassthroughSubject<Void, Never>()
     
-    //private var diContainer: AppDIContainer
     private let factory: AppFactory
     private var cancellables = Set<AnyCancellable>()
     

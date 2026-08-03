@@ -25,7 +25,7 @@ public final class AppCoordinator: Coordinator {
         
         let deckListCoordinator = DeckListCoordinator(
             navigationController: navigationController,
-            diContainer: container
+            factory: deckSceneDIContainer
         )
         
         addChild(deckListCoordinator)
