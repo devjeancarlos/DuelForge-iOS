@@ -8,6 +8,7 @@
 import Foundation
 import Observation
 
+@MainActor
 @Observable
 public final class EditDeckViewModel {
     public var deckName: String
@@ -15,32 +16,39 @@ public final class EditDeckViewModel {
     public var isSaving: Bool = false
     
     public var onUpdateFinished: (() -> Void)?
+    public var onAddCardTapped: (() -> Void)?
     
-    private let originalDeck: Deck
+    public var currentDeck: Deck
     private let updateDeckUseCase: UpdateDeckUseCaseProtocol
+    private let getDeckByIdUseCase: GetDeckByIDUseCaseProtocol
     
-    public init(deck: Deck, updateDeckUseCase: UpdateDeckUseCaseProtocol) {
-        self.originalDeck = deck
+    public init(deck: Deck, updateDeckUseCase: UpdateDeckUseCaseProtocol, getDeckByIDUseCase: GetDeckByIDUseCaseProtocol) {
+        self.currentDeck = deck
         self.deckName = deck.name
         self.deckArchetype = deck.archetype
         
         self.updateDeckUseCase = updateDeckUseCase
+        self.getDeckByIdUseCase = getDeckByIDUseCase
     }
     
     public var isSaveButtonEnabled: Bool {
         return !deckName.trimmingCharacters(in: .whitespaces).isEmpty && !deckArchetype.trimmingCharacters(in: .whitespaces).isEmpty
     }
     
-    @MainActor
+    public func addCardTapped() {
+        onAddCardTapped?()
+    }
+    
     public func updateDeck() async {
         guard isSaveButtonEnabled else { return }
         self.isSaving = true
         
         let updatedDeck = Deck(
-            id: originalDeck.id,
+            id: currentDeck.id,
             name: deckName,
             archetype: deckArchetype,
-            createdAt: originalDeck.createdAt
+            createdAt: currentDeck.createdAt,
+            cards: currentDeck.cards
         )
         
         do {
@@ -50,6 +58,17 @@ public final class EditDeckViewModel {
             self.onUpdateFinished?()
         } catch {
             print("Error updating deck: \(error.localizedDescription)")
+            isSaving = false
+        }
+    }
+    
+    public func reloadDeck() async {
+        do {
+            let refreshedDeck = try await getDeckByIdUseCase.execute(id: currentDeck.id)
+            
+            currentDeck = refreshedDeck
+        } catch {
+            print("Error reloading deck: \(error.localizedDescription)")
         }
     }
 }

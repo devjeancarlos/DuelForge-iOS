@@ -42,15 +42,40 @@ public final class SwiftDataCardRepository: CardRepositoryProtocol {
     }
     
     public func getCards(deckID: UUID) async throws -> [Card] {
+        let context = modelContainer.mainContext
+        let targetDeckId = deckID
+        /*
+         let descriptor = FetchDescriptor<CardEntity>(
+         predicate: #Predicate { $0.deck?.id == targetDeckId },
+         sortBy: [SortDescriptor(\.name, order: .forward)]
+         )
+         
+         let cards = try context.fetch(descriptor)
+         
+         return cards.map{ $0.toDomain() }*/
         
+        //to avoid the potential warning for use $0.deck?.id Implement in this form:
+        let descriptor = FetchDescriptor<DeckEntity>(
+            predicate: #Predicate { $0.id == targetDeckId }
+        )
+        
+        guard let deck = try context.fetch(descriptor).first, let cards = deck.cards else {
+            return []
+        }
+        
+        return cards.map { $0.toDomain() }
+            .sorted {
+                $0.name < $1.name
+            }
     }
     
     //Update existing card in deck (number copies of card and sector: main, extra or side)
     public func updateCardInDeck(card: Card) async throws {
         let context = modelContainer.mainContext
+        let targetID = card.id
         
         let descriptor = FetchDescriptor<CardEntity>(
-            predicate: #Predicate { $0.id == card.id }
+            predicate: #Predicate { $0.id == targetID }
         )
         
         guard let entity = try context.fetch(descriptor).first .self else {

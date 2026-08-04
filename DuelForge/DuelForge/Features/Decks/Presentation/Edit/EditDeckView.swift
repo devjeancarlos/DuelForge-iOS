@@ -21,6 +21,16 @@ public struct EditDeckView: View {
                 TextField("Archetype Deck", text: $viewModel.deckArchetype)
             }
             
+            Section(header: Text("Cards")) {
+                if viewModel.currentDeck.cards.isEmpty {
+                    ContentUnavailableView("No cards", systemImage: "lanyardcard", description: Text("Press '+' to add a card"))
+                } else {
+                    ForEach(viewModel.currentDeck.cards) { card in
+                        Text(card.name)
+                    }
+                }
+            }
+            
             Section {
                 Button(action: {
                     Task {
@@ -38,6 +48,17 @@ public struct EditDeckView: View {
                         Spacer()
                     }
                 })
+                .disabled(!viewModel.isSaveButtonEnabled || viewModel.isSaving)
+            }
+        }
+        .navigationTitle("Edit Deck")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    viewModel.addCardTapped()
+                } label: {
+                    Image(systemName: "plus")
+                }
             }
         }
     }

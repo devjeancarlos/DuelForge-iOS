@@ -60,7 +60,11 @@ extension DeckSceneDIContainer: AppFactory {
     }
     
     public func makeEditDeckViewModel(deck: Deck) -> EditDeckViewModel {
-        return EditDeckViewModel(deck: deck, updateDeckUseCase: makeUpdateDeckUseCase())
+        return EditDeckViewModel(deck: deck, updateDeckUseCase: makeUpdateDeckUseCase(), getDeckByIDUseCase: makeGetDeckByIdUseCase())
+    }
+    
+    public func makeGetDeckByIdUseCase() -> GetDeckByIDUseCaseProtocol {
+        return GetDeckByIDUseCase(deckRepository: makeDeckRepository())
     }
     
     @MainActor

@@ -9,21 +9,23 @@ import SwiftUI
 
 @main
 struct DuelForgeApp: App {
-    private let container = AppDIContainer()
     private let navigationController = UINavigationController()
     private let appCoordinator: AppCoordinator
     
     init() {
         self.appCoordinator = AppCoordinator(
-            navigationController: navigationController,
-            container: container)
+            navigationController: navigationController)
         
-        self.appCoordinator.start()
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        
+        navigationController.navigationBar.standardAppearance = appearance
+        navigationController.navigationBar.scrollEdgeAppearance = appearance
     }
     
     var body: some Scene {
         WindowGroup {
-            CoordinatorView(navigationController: navigationController)
+            CoordinatorView(appCoordinator: appCoordinator)
                 .ignoresSafeArea()
         }
     }

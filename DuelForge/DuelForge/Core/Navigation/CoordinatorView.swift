@@ -9,14 +9,15 @@ import SwiftUI
 import UIKit
 
 public struct CoordinatorView: UIViewControllerRepresentable {
-    private let navigationCotroller: UINavigationController
+    private let appCoordinator: AppCoordinator
     
-    public init(navigationController: UINavigationController) {
-        self.navigationCotroller = navigationController
+    public init(appCoordinator: AppCoordinator) {
+        self.appCoordinator = appCoordinator
     }
     
     public func makeUIViewController(context: Context) -> UINavigationController {
-        return navigationCotroller
+        appCoordinator.start()
+        return appCoordinator.navigationController
     }
     
     public func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {

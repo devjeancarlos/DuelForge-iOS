@@ -54,6 +54,8 @@ struct CardSearchResultRow: View {
     let card: Card
     let onAddTapped: () -> Void
     
+    @State private var showSuccess = false
+    
     var body: some View {
         HStack(spacing: 12) {
             AsyncImage(url: URL(string: card.imageUrl ?? "")) { image in
@@ -78,11 +80,23 @@ struct CardSearchResultRow: View {
             
             Spacer()
             
-            Button(action: onAddTapped) {
+            Button(action: {
+                onAddTapped()
+                
+                withAnimation(.spring(response:0.3, dampingFraction: 0.6)) {
+                    showSuccess = true
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    withAnimation {
+                        showSuccess = false
+                    }
+                }
+            }, label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
                     .foregroundColor(.blue)
-            }
+            })
             .frame(width: 44, height: 44)
         }
         .padding(.vertical, 4)

@@ -8,6 +8,17 @@
 import Foundation
 import SwiftData
 
+public enum DeckRepositoryError: Error, LocalizedError {
+    case notFound
+    
+    public var errorDescription: String? {
+        switch self {
+        case .notFound:
+            return "Deck not found in local database"
+        }
+    }
+}
+
 @MainActor
 public final class SwiftDataDeckRepository: DeckRepositoryProtocol {
     private let context: ModelContext
@@ -59,6 +70,19 @@ public final class SwiftDataDeckRepository: DeckRepositoryProtocol {
             try context.save()
         } else {
             print("Error: Could not update the deck, it does not exist in the database.")
+        }
+    }
+    
+    public func getDeck(by id: UUID) async throws -> Deck {
+        let targetID = id
+        let descriptor = FetchDescriptor<DeckEntity>(
+            predicate: #Predicate { $0.id == targetID }
+        )
+        
+        if let entity = try context.fetch(descriptor).first {
+            return entity.toDomain()
+        } else {
+            throw DeckRepositoryError.notFound
         }
     }
 }

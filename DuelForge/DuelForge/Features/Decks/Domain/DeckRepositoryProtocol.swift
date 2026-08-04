@@ -12,4 +12,5 @@ public protocol DeckRepositoryProtocol {
     func delete(id: UUID) async throws
     func save(deck: Deck) async throws
     func update(deck: Deck) async throws
+    func getDeck(by id: UUID) async throws -> Deck
 }
