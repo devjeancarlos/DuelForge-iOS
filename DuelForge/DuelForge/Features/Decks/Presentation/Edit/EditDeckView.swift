@@ -21,13 +21,33 @@ public struct EditDeckView: View {
                 TextField("Archetype Deck", text: $viewModel.deckArchetype)
             }
             
-            Section(header: Text("Cards")) {
-                if viewModel.currentDeck.cards.isEmpty {
-                    ContentUnavailableView("No cards", systemImage: "lanyardcard", description: Text("Press '+' to add a card"))
-                } else {
-                    ForEach(viewModel.currentDeck.cards) { card in
-                        Text(card.name)
+            if !viewModel.mainDeckCards.isEmpty {
+                Section(header: Text("Main Deck: \(viewModel.mainDeckCards.count) cards")) {
+                    ForEach(viewModel.mainDeckCards) { card in
+                        DeckCardRowView(card: card)
                     }
+                }
+            }
+            
+            if !viewModel.extraDeckCards.isEmpty {
+                Section(header: Text("Extra Deck: \(viewModel.extraDeckCards.count) cards")) {
+                    ForEach(viewModel.extraDeckCards) { card in
+                        DeckCardRowView(card: card)
+                    }
+                }
+            }
+            
+            if !viewModel.sideDeckCards.isEmpty {
+                Section(header: Text("Side Deck: \(viewModel.sideDeckCards.count) cards")) {
+                    ForEach(viewModel.sideDeckCards) { card in
+                        DeckCardRowView(card: card)
+                    }
+                }
+            }
+            
+            if viewModel.currentDeck.cards.isEmpty {
+                Section {
+                    ContentUnavailableView("No cards", systemImage: "lanyardcard", description: Text("Press '+' to add a card"))
                 }
             }
             
@@ -61,5 +81,47 @@ public struct EditDeckView: View {
                 }
             }
         }
+        .task { //To reload deck if the user back to the previous view
+            await viewModel.reloadDeck()
+        }
+    }
+}
+
+struct DeckCardRowView: View {
+    let card: Card
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            AsyncImage(url: URL(string: card.imageUrl ?? "")) { image in
+                image.resizable()
+                    .scaledToFit()
+            } placeholder: {
+                Color.gray.opacity(0.3)
+            }
+            .frame(width: 40, height: 58)
+            .cornerRadius(4)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(card.name)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .lineLimit(2)
+                
+                Text(card.type)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            Spacer()
+            
+            Text("x\(card.copies)")
+                .font(.headline)
+                .foregroundColor(.blue)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(8)
+        }
+        .padding(.vertical, 2)
     }
 }

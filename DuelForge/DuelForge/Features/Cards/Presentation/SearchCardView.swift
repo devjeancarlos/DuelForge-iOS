@@ -98,6 +98,7 @@ struct CardSearchResultRow: View {
                     .foregroundColor(.blue)
             })
             .frame(width: 44, height: 44)
+            .buttonStyle(.borderless)
         }
         .padding(.vertical, 4)
     }

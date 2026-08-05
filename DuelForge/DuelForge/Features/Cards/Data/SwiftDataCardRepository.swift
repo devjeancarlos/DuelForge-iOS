@@ -11,6 +11,18 @@ import SwiftData
 public enum CardRepositoryError: Error {
     case deckNotFound
     case cardNotFound
+    case maxCopiesReached
+    
+    public var errorDescription: String? {
+        switch self {
+        case .deckNotFound:
+            return "Deck not found"
+        case .cardNotFound:
+            return "Card not found"
+        case .maxCopiesReached:
+            return "Max copies reached"
+        }
+    }
 }
 
 public final class SwiftDataCardRepository: CardRepositoryProtocol {
@@ -22,20 +34,34 @@ public final class SwiftDataCardRepository: CardRepositoryProtocol {
     
     public func addCard(deckID: UUID, card: Card) async throws {
         let context = modelContainer.mainContext
+        let targetDeckId = deckID
+        let targetApiIDCard = card.apiID
         
         //Searching the deck
         let descriptor = FetchDescriptor<DeckEntity>(
-            predicate: #Predicate { $0.id == deckID }
+            predicate: #Predicate { $0.id == targetDeckId }
         )
         
         //Validation to obtain the deck that we want to add cards
-        guard let entity = try context.fetch(descriptor).first else {
+        guard let deckEntity = try context.fetch(descriptor).first else {
             throw CardRepositoryError.deckNotFound
         }
         
-        //If all is ok, add the card in the deck
-        let cardEntity = card.toEntity()
-        entity.cards?.append(cardEntity)
+        let limitCards = card.banlistStatus.maxCopiesAllowed
+        guard limitCards > 0 else {
+            throw CardInDeckError.bannedCard
+        }
+        
+        if let existingCardEntity = deckEntity.cards?.first(where: { $0.apiId == targetApiIDCard}) {
+            if existingCardEntity.copies >= limitCards || existingCardEntity.copies >= 3 {
+                throw CardRepositoryError.maxCopiesReached
+            }
+            existingCardEntity.copies += 1
+        } else {
+            //If all is ok, add the card in the deck
+            let cardEntity = card.toEntity()
+            deckEntity.cards?.append(cardEntity)
+        }
         
         //Save changes
         try context.save()
