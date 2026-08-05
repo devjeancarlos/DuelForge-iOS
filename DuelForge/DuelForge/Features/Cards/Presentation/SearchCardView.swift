@@ -31,7 +31,7 @@ public struct SearchCardView: View {
             }
             
             ForEach(viewModel.searchResults) { card in
-                CardSearchResultRow(card: card) {
+                CardSearchResultRow(card: card, currentCopies: viewModel.currentCopies(of: card), canAddMore: viewModel.canAddMoreCopies(of: card)) {
                     viewModel.addCardToDeck(card)
                 }
             }
@@ -52,6 +52,8 @@ public struct SearchCardView: View {
 
 struct CardSearchResultRow: View {
     let card: Card
+    let currentCopies: Int
+    let canAddMore: Bool
     let onAddTapped: () -> Void
     
     @State private var showSuccess = false
@@ -68,26 +70,50 @@ struct CardSearchResultRow: View {
             .cornerRadius(4)
             
             //Details card
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(card.name)
                     .font(.headline)
                     .lineLimit(2)
+                HStack {
+                    Text(card.type)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    if card.banlistStatus != .unlimited {
+                        Text(card.banlistStatus.rawValue.uppercased())
+                            .font(.caption2).bold()
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(card.banlistStatus.maxCopiesAllowed == 0 ? Color.red : Color.orange)
+                            .foregroundColor(.white)
+                            .cornerRadius(4)
+                    }
+                }
                 
-                Text(card.type)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+                if card.banlistStatus.maxCopiesAllowed == 0 {
+                    Text("FORBIDDEN - 0 allowed")
+                        .font(.caption2).bold().foregroundColor(.red)
+                } else if currentCopies > 0 {
+                    Text("\(currentCopies)/\(min(3, card.banlistStatus.maxCopiesAllowed)) in the deck")
+                        .font(.caption2).foregroundColor(.blue)
+                }
             }
             
             Spacer()
             
             Button(action: {
+                guard canAddMore else { return } //To validate
+                
+                let impactmed = UIImpactFeedbackGenerator(style: .medium)
+                impactmed.impactOccurred()
+                
                 onAddTapped()
                 
                 withAnimation(.spring(response:0.3, dampingFraction: 0.6)) {
                     showSuccess = true
                 }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                     withAnimation {
                         showSuccess = false
                     }
@@ -95,8 +121,9 @@ struct CardSearchResultRow: View {
             }, label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.title2)
-                    .foregroundColor(.blue)
+                    .foregroundColor(showSuccess ? .green : (canAddMore ? .blue : .gray.opacity(0.5)))
             })
+            .disabled(!canAddMore)
             .frame(width: 44, height: 44)
             .buttonStyle(.borderless)
         }

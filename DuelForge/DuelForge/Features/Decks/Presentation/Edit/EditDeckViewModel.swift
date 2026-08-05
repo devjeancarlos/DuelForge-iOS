@@ -33,14 +33,16 @@ public final class EditDeckViewModel {
     public var currentDeck: Deck
     private let updateDeckUseCase: UpdateDeckUseCaseProtocol
     private let getDeckByIdUseCase: GetDeckByIDUseCaseProtocol
+    private let removeCardFromDeckUseCase: RemoveCardFromDeckUseCaseProtocol
     
-    public init(deck: Deck, updateDeckUseCase: UpdateDeckUseCaseProtocol, getDeckByIDUseCase: GetDeckByIDUseCaseProtocol) {
+    public init(deck: Deck, updateDeckUseCase: UpdateDeckUseCaseProtocol, getDeckByIDUseCase: GetDeckByIDUseCaseProtocol, removeCardFromDeckUseCase: RemoveCardFromDeckUseCaseProtocol) {
         self.currentDeck = deck
         self.deckName = deck.name
         self.deckArchetype = deck.archetype
         
         self.updateDeckUseCase = updateDeckUseCase
         self.getDeckByIdUseCase = getDeckByIDUseCase
+        self.removeCardFromDeckUseCase = removeCardFromDeckUseCase
     }
     
     public var isSaveButtonEnabled: Bool {
@@ -81,6 +83,18 @@ public final class EditDeckViewModel {
             currentDeck = refreshedDeck
         } catch {
             print("Error reloading deck: \(error.localizedDescription)")
+        }
+    }
+    
+    public func removeCard(_ card: Card) {
+        Task {
+            do {
+                try await removeCardFromDeckUseCase.execute(card: card, deckID: currentDeck.id)
+                
+                await reloadDeck()
+            } catch {
+                print("Error removing card: \(error.localizedDescription)")
+            }
         }
     }
 }

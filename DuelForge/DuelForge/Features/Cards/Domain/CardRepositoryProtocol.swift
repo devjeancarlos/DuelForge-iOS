@@ -12,4 +12,5 @@ public protocol CardRepositoryProtocol {
     func getCards(deckID: UUID) async throws -> [Card]
     func updateCardInDeck(card: Card) async throws
     func deleteCard(cardID: UUID) async throws
+    func removeCardFromDeck(deckID: UUID, card: Card) async throws
 }

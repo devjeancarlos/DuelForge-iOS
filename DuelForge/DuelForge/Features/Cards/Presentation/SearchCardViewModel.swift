@@ -74,6 +74,9 @@ public final class SearchCardViewModel {
         Task {
             do {
                 try await addCardUseCase.execute(deck: self.deck, card: card)
+                self.errorMessage = nil
+            } catch let error as LocalizedError {
+                self.errorMessage = error.localizedDescription
             } catch {
                 self.errorMessage = "Error saving card"
             }
@@ -82,5 +85,18 @@ public final class SearchCardViewModel {
     
     public func finishSearch() {
         onFinished?()
+    }
+    
+    public func currentCopies(of card: Card) -> Int {
+        deck.cards.first(where: { $0.apiID == card.apiID })?.copies ?? 0
+    }
+    
+    public func canAddMoreCopies(of card: Card) -> Bool {
+        let maxCopies = card.banlistStatus.maxCopiesAllowed
+        if maxCopies == 0 {
+            return false
+        }
+        
+        return currentCopies(of: card) < min(3, maxCopies)
     }
 }

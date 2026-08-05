@@ -127,5 +127,31 @@ public final class SwiftDataCardRepository: CardRepositoryProtocol {
         }
     }
     
-    
+    public func removeCardFromDeck(deckID: UUID, card: Card) async throws {
+        let context = modelContainer.mainContext
+        let targetDeckID = deckID
+        let targetCardID = card.apiID
+        
+        let descriptor = FetchDescriptor<DeckEntity>(
+            predicate: #Predicate{ $0.id == targetDeckID }
+        )
+        
+        guard let deckEntity = try context.fetch(descriptor).first else {
+            throw CardRepositoryError.deckNotFound
+        }
+        
+        if let existingCard = deckEntity.cards?.first(where: { $0.apiId == targetCardID}) {
+            if existingCard.copies > 1 {
+                //Less 1 card
+                existingCard.copies -= 1
+            } else {
+                //Delete card
+                if let index = deckEntity.cards?.firstIndex(of: existingCard) {
+                    deckEntity.cards?.remove(at: index)
+                }
+                context.delete(existingCard)
+            }
+            try context.save()
+        }
+    }
 }

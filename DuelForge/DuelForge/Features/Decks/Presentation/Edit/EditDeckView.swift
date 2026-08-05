@@ -25,6 +25,20 @@ public struct EditDeckView: View {
                 Section(header: Text("Main Deck: \(viewModel.mainDeckCards.count) cards")) {
                     ForEach(viewModel.mainDeckCards) { card in
                         DeckCardRowView(card: card)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    let impact = UIImpactFeedbackGenerator(style: .rigid)
+                                    impact.impactOccurred()
+                                    
+                                    viewModel.removeCard(card)
+                                } label: {
+                                    Label(
+                                        card.copies > 1 ? "-1 Copy" : "Delete",
+                                        systemImage: card.copies > 1 ? "minus.square.fill" : "trash"
+                                        )
+                                }
+                                .tint(card.copies > 1 ? .orange: .red)
+                            }
                     }
                 }
             }
@@ -33,6 +47,20 @@ public struct EditDeckView: View {
                 Section(header: Text("Extra Deck: \(viewModel.extraDeckCards.count) cards")) {
                     ForEach(viewModel.extraDeckCards) { card in
                         DeckCardRowView(card: card)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    let impact = UIImpactFeedbackGenerator(style: .rigid)
+                                    impact.impactOccurred()
+                                    
+                                    viewModel.removeCard(card)
+                                } label: {
+                                    Label(
+                                        card.copies > 1 ? "-1 Copy" : "Delete",
+                                        systemImage: card.copies > 1 ? "minus.square.fill" : "trash"
+                                        )
+                                }
+                                .tint(card.copies > 1 ? .orange: .red)
+                            }
                     }
                 }
             }
@@ -41,6 +69,20 @@ public struct EditDeckView: View {
                 Section(header: Text("Side Deck: \(viewModel.sideDeckCards.count) cards")) {
                     ForEach(viewModel.sideDeckCards) { card in
                         DeckCardRowView(card: card)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    let impact = UIImpactFeedbackGenerator(style: .rigid)
+                                    impact.impactOccurred()
+                                    
+                                    viewModel.removeCard(card)
+                                } label: {
+                                    Label(
+                                        card.copies > 1 ? "-1 Copy" : "Delete",
+                                        systemImage: card.copies > 1 ? "minus.square.fill" : "trash"
+                                        )
+                                }
+                                .tint(card.copies > 1 ? .orange: .red)
+                            }
                     }
                 }
             }

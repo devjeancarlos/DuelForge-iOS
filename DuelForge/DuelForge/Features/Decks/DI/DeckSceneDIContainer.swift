@@ -48,6 +48,10 @@ public final class DeckSceneDIContainer {
     private func makeAddCardToDeckUseCase() -> AddCardToDeckUseCaseProtocol {
         return AddCardToDeckUseCase(repository: makeCardRepository())
     }
+    
+    private func makeRemoveCardFromDeckuseCase() -> RemoveCardFromDeckUseCaseProtocol {
+        return RemoveCardFromDeckUseCase(cardRepository: makeCardRepository())
+    }
 }
 
 extension DeckSceneDIContainer: AppFactory {
@@ -60,7 +64,7 @@ extension DeckSceneDIContainer: AppFactory {
     }
     
     public func makeEditDeckViewModel(deck: Deck) -> EditDeckViewModel {
-        return EditDeckViewModel(deck: deck, updateDeckUseCase: makeUpdateDeckUseCase(), getDeckByIDUseCase: makeGetDeckByIdUseCase())
+        return EditDeckViewModel(deck: deck, updateDeckUseCase: makeUpdateDeckUseCase(), getDeckByIDUseCase: makeGetDeckByIdUseCase(), removeCardFromDeckUseCase: makeRemoveCardFromDeckuseCase())
     }
     
     public func makeGetDeckByIdUseCase() -> GetDeckByIDUseCaseProtocol {
