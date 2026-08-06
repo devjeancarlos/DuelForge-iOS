@@ -21,72 +21,24 @@ public struct EditDeckView: View {
                 TextField("Archetype Deck", text: $viewModel.deckArchetype)
             }
             
-            if !viewModel.mainDeckCards.isEmpty {
-                Section(header: Text("Main Deck: \(viewModel.mainDeckCards.count) cards")) {
-                    ForEach(viewModel.mainDeckCards) { card in
-                        DeckCardRowView(card: card)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    let impact = UIImpactFeedbackGenerator(style: .rigid)
-                                    impact.impactOccurred()
-                                    
-                                    viewModel.removeCard(card)
-                                } label: {
-                                    Label(
-                                        card.copies > 1 ? "-1 Copy" : "Delete",
-                                        systemImage: card.copies > 1 ? "minus.square.fill" : "trash"
-                                        )
-                                }
-                                .tint(card.copies > 1 ? .orange: .red)
-                            }
-                    }
-                }
-            }
+            buildDeckSection(title: "Main Deck",
+                             cards: viewModel.currentDeck.cardsBySector(for: .main),
+                             totalCards: viewModel.currentDeck.totalCardsBySector(for: .main),
+                             maxLimitCards: DeckSector.main.maxLimit,
+                             isLegalDeck: viewModel.currentDeck.isMainDeckLegal)
             
-            if !viewModel.extraDeckCards.isEmpty {
-                Section(header: Text("Extra Deck: \(viewModel.extraDeckCards.count) cards")) {
-                    ForEach(viewModel.extraDeckCards) { card in
-                        DeckCardRowView(card: card)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    let impact = UIImpactFeedbackGenerator(style: .rigid)
-                                    impact.impactOccurred()
-                                    
-                                    viewModel.removeCard(card)
-                                } label: {
-                                    Label(
-                                        card.copies > 1 ? "-1 Copy" : "Delete",
-                                        systemImage: card.copies > 1 ? "minus.square.fill" : "trash"
-                                        )
-                                }
-                                .tint(card.copies > 1 ? .orange: .red)
-                            }
-                    }
-                }
-            }
+            buildDeckSection(title: "Extra Deck",
+                             cards: viewModel.currentDeck.cardsBySector(for: .extra),
+                             totalCards: viewModel.currentDeck.totalCardsBySector(for: .extra),
+                             maxLimitCards: DeckSector.extra.maxLimit,
+                             isLegalDeck: viewModel.currentDeck.isExtraDeckLegal)
             
-            if !viewModel.sideDeckCards.isEmpty {
-                Section(header: Text("Side Deck: \(viewModel.sideDeckCards.count) cards")) {
-                    ForEach(viewModel.sideDeckCards) { card in
-                        DeckCardRowView(card: card)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                Button(role: .destructive) {
-                                    let impact = UIImpactFeedbackGenerator(style: .rigid)
-                                    impact.impactOccurred()
-                                    
-                                    viewModel.removeCard(card)
-                                } label: {
-                                    Label(
-                                        card.copies > 1 ? "-1 Copy" : "Delete",
-                                        systemImage: card.copies > 1 ? "minus.square.fill" : "trash"
-                                        )
-                                }
-                                .tint(card.copies > 1 ? .orange: .red)
-                            }
-                    }
-                }
-            }
-            
+            buildDeckSection(title: "Side Deck",
+                             cards: viewModel.currentDeck.cardsBySector(for: .side),
+                             totalCards: viewModel.currentDeck.totalCardsBySector(for: .side),
+                             maxLimitCards: DeckSector.side.maxLimit,
+                             isLegalDeck: viewModel.currentDeck.isSideDeckLegal)
+           
             if viewModel.currentDeck.cards.isEmpty {
                 Section {
                     ContentUnavailableView("No cards", systemImage: "lanyardcard", description: Text("Press '+' to add a card"))
@@ -125,6 +77,38 @@ public struct EditDeckView: View {
         }
         .task { //To reload deck if the user back to the previous view
             await viewModel.reloadDeck()
+        }
+    }
+    
+    @ViewBuilder
+    private func buildDeckSection(title: String, cards: [Card], totalCards: Int, maxLimitCards: Int, isLegalDeck: Bool = true) -> some View {
+        if !cards.isEmpty {
+            Section {
+                ForEach(cards) { card in
+                    DeckCardRowView(card: card)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                let impact = UIImpactFeedbackGenerator(style: .rigid)
+                                impact.impactOccurred()
+                                
+                                viewModel.removeCard(card)
+                            } label: {
+                                Label(
+                                    card.copies > 1 ? "-1 Copy" : "Delete",
+                                    systemImage: card.copies > 1 ? "minus.square.fill" : "trash"
+                                    )
+                            }
+                            .tint(card.copies > 1 ? .orange: .red)
+                        }
+                }
+            } header: {
+                HStack{
+                    Text(title)
+                    Spacer()
+                    Text("\(totalCards)/\(maxLimitCards)")
+                        .foregroundColor(isLegalDeck ? .secondary :.red)
+                }
+            }
         }
     }
 }

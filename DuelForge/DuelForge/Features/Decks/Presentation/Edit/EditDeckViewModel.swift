@@ -15,7 +15,7 @@ public final class EditDeckViewModel {
     public var deckArchetype: String
     public var isSaving: Bool = false
     
-    public var mainDeckCards: [Card] {
+    /*public var mainDeckCards: [Card] {
         currentDeck.cards.filter { $0.sector == .main }
     }
     
@@ -25,7 +25,7 @@ public final class EditDeckViewModel {
     
     public var sideDeckCards: [Card] {
         currentDeck.cards.filter { $0.sector == .side }
-    }
+    }*/
     
     public var onUpdateFinished: (() -> Void)?
     public var onAddCardTapped: (() -> Void)?

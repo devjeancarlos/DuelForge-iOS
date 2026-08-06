@@ -13,6 +13,22 @@ public enum DeckSector: String, Codable, CaseIterable {
     case side = "Side Deck"
 }
 
+public extension DeckSector {
+    var minLimit: Int {
+        switch self {
+        case .main: return 40
+        case .extra, .side: return 0
+        }
+    }
+    
+    var maxLimit: Int {
+        switch self {
+        case .main: return 60
+        case .extra, .side: return 15
+        }
+    }
+}
+
 public enum BanlistStatus: String, Codable {
     case forbidden = "Banned"
     case limited = "Limited"

@@ -12,6 +12,7 @@ public enum CardRepositoryError: Error {
     case deckNotFound
     case cardNotFound
     case maxCopiesReached
+    case sectorFull(sector: String, limit: Int)
     
     public var errorDescription: String? {
         switch self {
@@ -21,6 +22,8 @@ public enum CardRepositoryError: Error {
             return "Card not found"
         case .maxCopiesReached:
             return "Max copies reached"
+        case .sectorFull(let sector, let limit):
+            return "The \(sector) deck has reached the maximum of \(limit) cards"
         }
     }
 }
@@ -52,7 +55,18 @@ public final class SwiftDataCardRepository: CardRepositoryProtocol {
             throw CardInDeckError.bannedCard
         }
         
+        //Total of cards of the section card that we try to add
+        let currentSectorTotal = deckEntity.cards?.filter{
+            $0.sector == card.sector.rawValue
+        }.reduce(0) { $0 + $1.copies } ?? 0
+        
+        //Verify if no exceeds the limit of sector
+        if currentSectorTotal >= card.sector.maxLimit {
+            throw CardRepositoryError.sectorFull(sector: card.sector.rawValue, limit: card.sector.maxLimit)
+        }
+        
         if let existingCardEntity = deckEntity.cards?.first(where: { $0.apiId == targetApiIDCard}) {
+            //Verify if the card is allowed to use
             if existingCardEntity.copies >= limitCards || existingCardEntity.copies >= 3 {
                 throw CardRepositoryError.maxCopiesReached
             }

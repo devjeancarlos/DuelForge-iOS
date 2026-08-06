@@ -37,3 +37,32 @@ public extension Deck {
         return entity
     }
 }
+
+public extension Deck {
+    func cardsBySector(for sector: DeckSector) -> [Card] {
+        return cards.filter{
+            $0.sector == sector
+        }
+    }
+    
+    func totalCardsBySector(for sector: DeckSector) -> Int {
+        return cardsBySector(for: sector).reduce(0) { total, card in
+            total + card.copies
+        }
+    }
+    
+    var isMainDeckLegal: Bool {
+        let total = totalCardsBySector(for: .main)
+        return total >= DeckSector.main.minLimit && total <= DeckSector.main.maxLimit
+    }
+    
+    var isExtraDeckLegal: Bool {
+        let total = totalCardsBySector(for: .extra)
+        return total >= DeckSector.extra.minLimit && total <= DeckSector.extra.maxLimit
+    }
+    
+    var isSideDeckLegal: Bool {
+        let total = totalCardsBySector(for: .side)
+        return total >= DeckSector.side.minLimit && total <= DeckSector.side.maxLimit
+    }
+}
